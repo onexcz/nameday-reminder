@@ -1,85 +1,255 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, computed, onMounted } from 'vue'
+import Papa from 'papaparse'
+import { GOOGLE_CONFIG } from './config/google-api'
+
+interface Person {
+  name: string
+  day: string
+  month: string
+}
+
+const isAuthenticated = ref(false)
+const searchQuery = ref('')
+const selectedName = ref<Person | null>(null)
+const names = ref<Person[]>([])
+const message = ref('')
+const messageType = ref('')
+
+let gapiInited = ref(false)
+let gisInited = ref(false)
+let tokenClient: google.accounts.oauth2.TokenClient
+
+const filteredNames = computed(() => {
+  if (!searchQuery.value) return names.value
+  return names.value.filter(person => 
+    person.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+onMounted(async () => {
+  await loadGoogleAPI()
+  loadCSVData()
+})
+
+async function loadGoogleAPI() {
+  const script = document.createElement('script')
+  script.src = 'https://apis.google.com/js/api.js'
+  document.body.appendChild(script)
+
+  return new Promise((resolve) => {
+    script.onload = async () => {
+      await new Promise((resolve) => gapi.load('client', resolve))
+      await gapi.client.init({
+        apiKey: GOOGLE_CONFIG.API_KEY,
+        discoveryDocs: [GOOGLE_CONFIG.DISCOVERY_DOC]
+      })
+      gapiInited.value = true
+      resolve(true)
+    }
+  })
+}
+
+function loadCSVData() {
+  fetch('/src/data/name_days.csv')
+    .then(response => response.text())
+    .then(csvString => {
+      const results = Papa.parse(csvString, {
+        delimiter: ';',
+        skipEmptyLines: true
+      })
+      
+      names.value = results.data.map((row: string[]) => ({
+        name: row[0],
+        day: row[1].padStart(2, '0'),
+        month: row[2].padStart(2, '0')
+      }))
+    })
+    .catch(error => {
+      message.value = 'Error loading names data'
+      messageType.value = 'error'
+      console.error('Error loading CSV:', error)
+    })
+}
+
+async function handleLogin() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CONFIG.CLIENT_ID,
+    scope: GOOGLE_CONFIG.SCOPES,
+    callback: (response) => {
+      if (response.error) {
+        message.value = 'Error during authentication'
+        messageType.value = 'error'
+        return
+      }
+      isAuthenticated.value = true
+      message.value = 'Successfully logged in'
+      messageType.value = 'success'
+    }
+  })
+  
+  tokenClient.requestAccessToken()
+}
+
+async function createReminder() {
+  if (!selectedName.value) return
+
+  try {
+    const person = selectedName.value
+    const year = new Date().getFullYear()
+    const eventDate = `${year}-${person.month}-${person.day}`
+    
+    // Create calendar event
+    const event = {
+      summary: `${person.name}: svátek!`,
+      start: {
+        date: eventDate,
+      },
+      end: {
+        date: eventDate,
+      },
+      recurrence: ['RRULE:FREQ=YEARLY'],
+    }
+
+    await gapi.client.calendar.events.insert({
+      calendarId: 'primary',
+      resource: event,
+    })
+
+    // Create tasks
+    await gapi.client.tasks.tasklists.list().then(async (response) => {
+      const taskListId = response.result.items?.[0].id
+
+      if (!taskListId) throw new Error('No task list found')
+
+      // Create task for 7 days before
+      const sevenDaysBefore = new Date(year, parseInt(person.month) - 1, parseInt(person.day))
+      sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7)
+      
+      await gapi.client.tasks.tasks.insert({
+        tasklist: taskListId,
+        resource: {
+          title: `${person.name}: svátek!`,
+          due: sevenDaysBefore.toISOString(),
+        },
+      })
+
+      // Create task for 1 day before
+      const oneDayBefore = new Date(year, parseInt(person.month) - 1, parseInt(person.day))
+      oneDayBefore.setDate(oneDayBefore.getDate() - 1)
+      
+      await gapi.client.tasks.tasks.insert({
+        tasklist: taskListId,
+        resource: {
+          title: `${person.name}: svátek!`,
+          due: oneDayBefore.toISOString(),
+        },
+      })
+    })
+
+    message.value = 'Reminder created successfully!'
+    messageType.value = 'success'
+  } catch (error) {
+    message.value = 'Error creating reminder'
+    messageType.value = 'error'
+    console.error('Error:', error)
+  }
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <div class="app">
+    <h1>Calendar Reminder App</h1>
+    
+    <div v-if="!isAuthenticated">
+      <button @click="handleLogin">Login with Google</button>
     </div>
-  </header>
+    
+    <div v-else>
+      <div class="name-selector">
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Search names..."
+          class="search-input"
+        />
+        <select 
+          v-model="selectedName"
+          class="name-select"
+        >
+          <option value="">Select a name</option>
+          <option 
+            v-for="person in filteredNames" 
+            :key="person.name" 
+            :value="person"
+          >
+            {{ person.name }}
+          </option>
+        </select>
+      </div>
 
-  <RouterView />
+      <button 
+        @click="createReminder"
+        :disabled="!selectedName"
+        class="create-button"
+      >
+        Create Reminder
+      </button>
+
+      <div v-if="message" :class="['message', messageType]">
+        {{ message }}
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.name-selector {
+  margin: 20px 0;
 }
 
-nav {
+.search-input,
+.name-select {
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.create-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.create-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.message {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 4px;
 }
 
-nav a:first-of-type {
-  border: 0;
+.success {
+  background-color: #dff0d8;
+  color: #3c763d;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.error {
+  background-color: #f2dede;
+  color: #a94442;
 }
 </style>
