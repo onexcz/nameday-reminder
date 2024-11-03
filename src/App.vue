@@ -37,9 +37,13 @@ async function loadGoogleAPI() {
   script.src = 'https://apis.google.com/js/api.js'
   document.body.appendChild(script)
 
-  return new Promise((resolve) => {
+  return new Promise<boolean>((resolve) => {
     script.onload = async () => {
-      await new Promise((resolve) => gapi.load('client', resolve))
+      await new Promise<void>((resolveGapi) => {
+        if (typeof gapi !== 'undefined') {
+          gapi.load('client', () => resolveGapi())
+        }
+      })
       await gapi.client.init({
         apiKey: GOOGLE_CONFIG.API_KEY,
         discoveryDocs: [GOOGLE_CONFIG.DISCOVERY_DOC]
@@ -54,15 +58,15 @@ function loadCSVData() {
   fetch('/src/data/name_days.csv')
     .then(response => response.text())
     .then(csvString => {
-      const results = Papa.parse(csvString, {
+      const results = Papa.parse<string[]>(csvString, {
         delimiter: ';',
         skipEmptyLines: true
       })
       
-      names.value = results.data.map((row: string[]) => ({
-        name: row[0],
-        day: row[1].padStart(2, '0'),
-        month: row[2].padStart(2, '0')
+      names.value = results.data.map((row) => ({
+        name: row[0] || '',
+        day: (row[1] || '').padStart(2, '0'),
+        month: (row[2] || '').padStart(2, '0')
       }))
     })
     .catch(error => {
