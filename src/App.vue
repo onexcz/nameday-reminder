@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import * as Papa from 'papaparse'
 import { GOOGLE_CONFIG } from './config/google-api'
+import GoogleLoginButton from './components/GoogleLoginButton.vue'
+import NameSelector from './components/NameSelector.vue'
+import CreateReminderButton from './components/CreateReminderButton.vue'
+import StatusMessage from './components/StatusMessage.vue'
 
 interface Person {
   name: string
@@ -10,35 +14,19 @@ interface Person {
 }
 
 const isAuthenticated = ref(false)
-const selectedNameInput = ref('')
 const selectedName = ref<Person | null>(null)
 const names = ref<Person[]>([])
 const message = ref('')
 const messageType = ref('')
+const isCreating = ref(false)
 
 let gapiInited = ref(false)
 let gisInited = ref(false)
 let tokenClient: google.accounts.oauth2.TokenClient
 
-const searchInput = ref('')
-const showDropdown = ref(false)
-
-const filteredNames = computed(() => {
-  if (!searchInput.value) return names.value
-  return names.value.filter(person => 
-    person.name.toLowerCase().includes(searchInput.value.toLowerCase())
-  )
-})
-
 onMounted(async () => {
   await loadGoogleAPI()
   loadCSVData()
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement
-    if (!target.closest('.input-container')) {
-      showDropdown.value = false
-    }
-  })
 })
 
 async function loadGoogleAPI() {
@@ -131,8 +119,6 @@ async function handleLogin() {
   tokenClient.requestAccessToken()
 }
 
-const isCreating = ref(false)
-
 async function createReminder() {
   if (!selectedName.value || isCreating.value) return
 
@@ -222,15 +208,8 @@ async function createReminder() {
   }
 }
 
-function handleInput() {
-  showDropdown.value = true
-  selectedName.value = null
-}
-
-function selectName(person: Person) {
+function handleNameSelect(person: Person) {
   selectedName.value = person
-  searchInput.value = person.name
-  showDropdown.value = false
 }
 </script>
 
@@ -238,48 +217,26 @@ function selectName(person: Person) {
   <div class="app">
     <h1>Calendar Reminder App</h1>
     
-    <div v-if="message" :class="['message', messageType]">
-      {{ message }}
-    </div>
+    <StatusMessage 
+      :message="message"
+      :type="messageType"
+    />
     
     <div v-if="!isAuthenticated">
-      <button @click="handleLogin">Login with Google</button>
+      <GoogleLoginButton :onLogin="handleLogin" />
     </div>
     
     <div v-else>
-      <div class="name-selector">
-        <div class="input-container">
-          <input 
-            v-model="searchInput"
-            placeholder="Type or select a name..."
-            class="name-input"
-            @input="handleInput"
-            @focus="showDropdown = true"
-          />
-          <div 
-            v-if="showDropdown && filteredNames.length > 0" 
-            class="dropdown"
-          >
-            <div 
-              v-for="person in filteredNames" 
-              :key="person.name"
-              class="dropdown-item"
-              @click="selectName(person)"
-            >
-              {{ person.name }}
-            </div>
-          </div>
-        </div>
-      </div>
+      <NameSelector 
+        :names="names"
+        :onSelect="handleNameSelect"
+      />
 
-      <button 
-        @click="createReminder"
-        :disabled="!selectedName || isCreating"
-        class="create-button"
-      >
-        <span v-if="!isCreating">Create Reminder</span>
-        <div v-else class="spinner"></div>
-      </button>
+      <CreateReminderButton 
+        :disabled="!selectedName"
+        :isCreating="isCreating"
+        :onCreate="createReminder"
+      />
     </div>
   </div>
 </template>
@@ -289,102 +246,5 @@ function selectName(person: Person) {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-}
-
-.name-selector {
-  margin: 20px 0;
-  width: 100%;
-}
-
-.input-container {
-  position: relative;
-  width: 100%;
-}
-
-.name-input {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.dropdown-item {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f5f5;
-}
-
-.create-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  min-width: 120px;
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.create-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.message {
-  margin-top: 20px;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.success {
-  background-color: #dff0d8;
-  color: #3c763d;
-}
-
-.error {
-  background-color: #f2dede;
-  color: #a94442;
-}
-
-.message.info {
-  background-color: #d9edf7;
-  color: #31708f;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #ffffff;
-  border-top: 3px solid transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 </style>
