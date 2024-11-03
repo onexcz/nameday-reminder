@@ -26,6 +26,20 @@ let gapiInited = ref(false)
 let gisInited = ref(false)
 let tokenClient: google.accounts.oauth2.TokenClient
 
+// Initialize notifications with default values
+const notifications = ref<Notification[]>([
+  {
+    id: crypto.randomUUID(),
+    daysBefore: 7,
+    time: '08:00'
+  },
+  {
+    id: crypto.randomUUID(),
+    daysBefore: 1,
+    time: '08:00'
+  }
+])
+
 onMounted(async () => {
   await loadGoogleAPI()
   loadCSVData()
