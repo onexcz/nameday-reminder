@@ -6,6 +6,8 @@ import GoogleLoginButton from './components/GoogleLoginButton.vue'
 import NameSelector from './components/NameSelector.vue'
 import CreateReminderButton from './components/CreateReminderButton.vue'
 import StatusMessage from './components/StatusMessage.vue'
+import NotificationSettings from './components/NotificationSettings.vue'
+import type { Person, Notification } from './types/types'
 
 interface Person {
   name: string
@@ -157,7 +159,7 @@ async function createReminder() {
       calendarId = newCalendar.result.id
     }
 
-    // Create calendar event
+    // Create calendar event with custom notifications
     const event = {
       summary: `${person.name}: svátek!`,
       start: {
@@ -169,12 +171,15 @@ async function createReminder() {
       recurrence: ['RRULE:FREQ=YEARLY'],
       reminders: {
         useDefault: false,
-        overrides: [
-          // 7 days before at 8:00 AM (7 days * 24 hours * 60 minutes - 8 hours * 60 minutes)
-          { method: 'popup', minutes: (7 * 24 * 60) - (8 * 60) },
-          // 1 day before at 8:00 AM (24 hours * 60 minutes - 8 hours * 60 minutes)
-          { method: 'popup', minutes: (24 * 60) - (8 * 60) }
-        ]
+        overrides: notifications.value.map(notification => {
+          // Convert days and time to minutes
+          const [hours, minutes] = notification.time.split(':').map(Number)
+          const totalMinutes = (notification.daysBefore * 24 * 60) - (hours * 60 + minutes)
+          return {
+            method: 'popup',
+            minutes: totalMinutes
+          }
+        })
       }
     }
 
@@ -211,6 +216,10 @@ async function createReminder() {
 function handleNameSelect(person: Person) {
   selectedName.value = person
 }
+
+function handleNotificationsUpdate(newNotifications: Notification[]) {
+  notifications.value = newNotifications
+}
 </script>
 
 <template>
@@ -230,6 +239,11 @@ function handleNameSelect(person: Person) {
       <NameSelector 
         :names="names"
         :onSelect="handleNameSelect"
+      />
+
+      <NotificationSettings
+        :notifications="notifications"
+        :onUpdate="handleNotificationsUpdate"
       />
 
       <CreateReminderButton 
