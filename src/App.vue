@@ -181,43 +181,21 @@ async function createReminder() {
         date: eventDate,
       },
       recurrence: ['RRULE:FREQ=YEARLY'],
+      reminders: {
+        useDefault: false,
+        overrides: [
+          // 7 days before at 8:00 AM (7 days * 24 hours * 60 minutes - 8 hours * 60 minutes)
+          { method: 'popup', minutes: (7 * 24 * 60) - (8 * 60) },
+          // 1 day before at 8:00 AM (24 hours * 60 minutes - 8 hours * 60 minutes)
+          { method: 'popup', minutes: (24 * 60) - (8 * 60) }
+        ]
+      }
     }
 
      await gapi.client.calendar.events.insert({
       calendarId: calendarId,  // Use the Svátky calendar ID instead of 'primary'
       resource: event,
     })
-/*
-    // Create tasks
-    await gapi.client.tasks.tasklists.list().then(async (response) => {
-      const taskListId = response.result.items?.[0].id
-
-      if (!taskListId) throw new Error('No task list found')
-
-      // Create task for 7 days before
-      const sevenDaysBefore = new Date(year, parseInt(person.month) - 1, parseInt(person.day))
-      sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7)
-      
-      await gapi.client.tasks.tasks.insert({
-        tasklist: taskListId,
-        resource: {
-          title: `${person.name}: svátek!`,
-          due: sevenDaysBefore.toISOString(),
-        },
-      })
-
-      // Create task for 1 day before
-      const oneDayBefore = new Date(year, parseInt(person.month) - 1, parseInt(person.day))
-      oneDayBefore.setDate(oneDayBefore.getDate() - 1)
-      
-      await gapi.client.tasks.tasks.insert({
-        tasklist: taskListId,
-        resource: {
-          title: `${person.name}: svátek!`,
-          due: oneDayBefore.toISOString(),
-        },
-      })
-    }) */
 
     // Calculate how long the operation took
     const operationTime = Date.now() - startTime
