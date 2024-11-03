@@ -97,6 +97,7 @@ function loadCSVData() {
         day: (row[1] || '').padStart(2, '0'),
         month: (row[2] || '').padStart(2, '0')
       }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
     })
     .catch(error => {
       message.value = 'Error loading names data'
