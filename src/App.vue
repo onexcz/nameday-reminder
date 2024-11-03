@@ -9,12 +9,6 @@ import StatusMessage from './components/StatusMessage.vue'
 import NotificationSettings from './components/NotificationSettings.vue'
 import type { Person, Notification } from './types/types'
 
-interface Person {
-  name: string
-  day: string
-  month: string
-}
-
 const isAuthenticated = ref(false)
 const selectedName = ref<Person | null>(null)
 const names = ref<Person[]>([])

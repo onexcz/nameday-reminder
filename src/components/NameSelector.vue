@@ -62,7 +62,7 @@ onMounted(() => {
           class="dropdown-item"
           @click="selectName(person)"
         >
-          {{ person.name }}
+          {{ `${person.name} (${person.day}.${person.month})` }}
         </div>
       </div>
     </div>
