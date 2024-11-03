@@ -183,11 +183,11 @@ async function createReminder() {
       recurrence: ['RRULE:FREQ=YEARLY'],
     }
 
-/*     await gapi.client.calendar.events.insert({
+     await gapi.client.calendar.events.insert({
       calendarId: calendarId,  // Use the Svátky calendar ID instead of 'primary'
       resource: event,
     })
-
+/*
     // Create tasks
     await gapi.client.tasks.tasklists.list().then(async (response) => {
       const taskListId = response.result.items?.[0].id
