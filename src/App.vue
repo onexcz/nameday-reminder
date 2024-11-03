@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import Papa from 'papaparse'
+import * as Papa from 'papaparse'
 import { GOOGLE_CONFIG } from './config/google-api'
 
 interface Person {
@@ -9,7 +9,7 @@ interface Person {
   month: string
 }
 
-const isAuthenticated = ref(true)
+const isAuthenticated = ref(false)
 const selectedNameInput = ref('')
 const selectedName = ref<Person | null>(null)
 const names = ref<Person[]>([])
@@ -42,15 +42,22 @@ onMounted(async () => {
 })
 
 async function loadGoogleAPI() {
-  const script = document.createElement('script')
-  script.src = 'https://apis.google.com/js/api.js'
-  document.body.appendChild(script)
+  // Load Google API Script
+  const gapiScript = document.createElement('script')
+  gapiScript.src = 'https://apis.google.com/js/api.js'
+  document.body.appendChild(gapiScript)
+
+  // Load Google Identity Services Script
+  const gisScript = document.createElement('script')
+  gisScript.src = 'https://accounts.google.com/gsi/client'
+  document.body.appendChild(gisScript)
 
   return new Promise<boolean>((resolve) => {
-    script.onload = async () => {
+    // Handle GAPI loading
+    gapiScript.onload = async () => {
       await new Promise<void>((resolveGapi) => {
         if (typeof gapi !== 'undefined') {
-          gapi.load('client', () => resolveGapi())
+          (gapi as any).load('client', () => resolveGapi())
         }
       })
       await gapi.client.init({
@@ -58,7 +65,20 @@ async function loadGoogleAPI() {
         discoveryDocs: [GOOGLE_CONFIG.DISCOVERY_DOC]
       })
       gapiInited.value = true
-      resolve(true)
+      checkBothLoaded()
+    }
+
+    // Handle GIS loading separately
+    gisScript.onload = () => {
+      gisInited.value = true
+      checkBothLoaded()
+    }
+
+    // Helper function to resolve when both are loaded
+    function checkBothLoaded() {
+      if (gapiInited.value && gisInited.value) {
+        resolve(true)
+      }
     }
   })
 }
@@ -86,6 +106,12 @@ function loadCSVData() {
 }
 
 async function handleLogin() {
+  if (!gapiInited.value || !gisInited.value) {
+    message.value = 'Please wait for Google API to load'
+    messageType.value = 'error'
+    return
+  }
+
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CONFIG.CLIENT_ID,
     scope: GOOGLE_CONFIG.SCOPES,
@@ -185,6 +211,10 @@ function selectName(person: Person) {
   <div class="app">
     <h1>Calendar Reminder App</h1>
     
+    <div v-if="message" :class="['message', messageType]">
+      {{ message }}
+    </div>
+    
     <div v-if="!isAuthenticated">
       <button @click="handleLogin">Login with Google</button>
     </div>
@@ -222,10 +252,6 @@ function selectName(person: Person) {
       >
         Create Reminder
       </button>
-
-      <div v-if="message" :class="['message', messageType]">
-        {{ message }}
-      </div>
     </div>
   </div>
 </template>
