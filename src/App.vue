@@ -140,6 +140,8 @@ async function createReminder() {
   message.value = 'Creating reminder...'
   messageType.value = 'info'
 
+  const startTime = Date.now()
+
   try {
     const person = selectedName.value
     const year = new Date().getFullYear()
@@ -217,9 +219,23 @@ async function createReminder() {
       })
     }) */
 
+    // Calculate how long the operation took
+    const operationTime = Date.now() - startTime
+    
+    // If operation took less than 2 seconds, wait for the remaining time
+    if (operationTime < 2000) {
+      await new Promise(resolve => setTimeout(resolve, 2000 - operationTime))
+    }
+
     message.value = 'Reminder created successfully!'
     messageType.value = 'success'
   } catch (error) {
+    // For errors, also ensure minimum 2 second delay
+    const operationTime = Date.now() - startTime
+    if (operationTime < 2000) {
+      await new Promise(resolve => setTimeout(resolve, 2000 - operationTime))
+    }
+
     message.value = 'Error creating reminder'
     messageType.value = 'error'
     console.error('Error:', error)
