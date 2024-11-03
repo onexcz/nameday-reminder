@@ -131,14 +131,44 @@ async function handleLogin() {
   tokenClient.requestAccessToken()
 }
 
+const isCreating = ref(false)
+
 async function createReminder() {
-  if (!selectedName.value) return
+  if (!selectedName.value || isCreating.value) return
+
+  isCreating.value = true
+  message.value = 'Creating reminder...'
+  messageType.value = 'info'
 
   try {
     const person = selectedName.value
     const year = new Date().getFullYear()
     const eventDate = `${year}-${person.month}-${person.day}`
     
+    // Find or create "Svátky" calendar
+    let calendarId = null
+    const calendarList = await gapi.client.request({
+      path: 'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+    })
+    const svatkyCalendar = calendarList.result.items?.find(
+      cal => cal.summary === 'Svátky'
+    )
+
+    if (svatkyCalendar) {
+      calendarId = svatkyCalendar.id
+    } else {
+      // Create new calendar
+      const newCalendar = await gapi.client.request({
+        path: 'https://www.googleapis.com/calendar/v3/calendars',
+        method: 'POST',
+        body: {
+          summary: 'Svátky',
+          timeZone: 'Europe/Prague'
+        }
+      })
+      calendarId = newCalendar.result.id
+    }
+
     // Create calendar event
     const event = {
       summary: `${person.name}: svátek!`,
@@ -151,8 +181,8 @@ async function createReminder() {
       recurrence: ['RRULE:FREQ=YEARLY'],
     }
 
-    await gapi.client.calendar.events.insert({
-      calendarId: 'primary',
+/*     await gapi.client.calendar.events.insert({
+      calendarId: calendarId,  // Use the Svátky calendar ID instead of 'primary'
       resource: event,
     })
 
@@ -185,7 +215,7 @@ async function createReminder() {
           due: oneDayBefore.toISOString(),
         },
       })
-    })
+    }) */
 
     message.value = 'Reminder created successfully!'
     messageType.value = 'success'
@@ -193,6 +223,8 @@ async function createReminder() {
     message.value = 'Error creating reminder'
     messageType.value = 'error'
     console.error('Error:', error)
+  } finally {
+    isCreating.value = false
   }
 }
 
@@ -248,10 +280,11 @@ function selectName(person: Person) {
 
       <button 
         @click="createReminder"
-        :disabled="!selectedName"
+        :disabled="!selectedName || isCreating"
         class="create-button"
       >
-        Create Reminder
+        <span v-if="!isCreating">Create Reminder</span>
+        <div v-else class="spinner"></div>
       </button>
     </div>
   </div>
@@ -313,6 +346,11 @@ function selectName(person: Person) {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  min-width: 120px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .create-button:disabled {
@@ -334,5 +372,25 @@ function selectName(person: Person) {
 .error {
   background-color: #f2dede;
   color: #a94442;
+}
+
+.message.info {
+  background-color: #d9edf7;
+  color: #31708f;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ffffff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
