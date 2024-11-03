@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useTranslations } from '../composables/useTranslations'
 
 interface Person {
   name: string
@@ -14,6 +15,8 @@ const props = defineProps<{
 
 const searchInput = ref('')
 const showDropdown = ref(false)
+
+const { t } = useTranslations()
 
 const filteredNames = computed(() => {
   if (!searchInput.value) return props.names
@@ -47,7 +50,7 @@ onMounted(() => {
     <div class="input-container">
       <input 
         v-model="searchInput"
-        placeholder="Type or select a name..."
+        :placeholder="t.searchPlaceholder"
         class="name-input"
         @input="handleInput"
         @focus="showDropdown = true"

@@ -8,6 +8,8 @@ import CreateReminderButton from './components/CreateReminderButton.vue'
 import StatusMessage from './components/StatusMessage.vue'
 import NotificationSettings from './components/NotificationSettings.vue'
 import type { Person, Notification } from './types/types'
+import { useTranslations } from './composables/useTranslations'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
 
 const isAuthenticated = ref(false)
 const selectedName = ref<Person | null>(null)
@@ -33,6 +35,8 @@ const notifications = ref<Notification[]>([
     time: '08:00'
   }
 ])
+
+const { t, currentLanguage, setLanguage } = useTranslations()
 
 onMounted(async () => {
   await loadGoogleAPI()
@@ -98,7 +102,7 @@ function loadCSVData() {
       .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
     })
     .catch(error => {
-      message.value = 'Error loading names data'
+      message.value = t.value.loadingError
       messageType.value = 'error'
       console.error('Error loading CSV:', error)
     })
@@ -106,7 +110,7 @@ function loadCSVData() {
 
 async function handleLogin() {
   if (!gapiInited.value || !gisInited.value) {
-    message.value = 'Please wait for Google API to load'
+    message.value = t.value.waitForApi
     messageType.value = 'error'
     return
   }
@@ -116,12 +120,12 @@ async function handleLogin() {
     scope: GOOGLE_CONFIG.SCOPES,
     callback: (response) => {
       if (response.error) {
-        message.value = 'Error during authentication'
+        message.value = t.value.loginError
         messageType.value = 'error'
         return
       }
       isAuthenticated.value = true
-      message.value = 'Successfully logged in'
+      message.value = t.value.loginSuccess
       messageType.value = 'success'
     }
   })
@@ -133,7 +137,7 @@ async function createReminder() {
   if (!selectedName.value || isCreating.value) return
 
   isCreating.value = true
-  message.value = 'Creating reminder...'
+  message.value = t.value.creatingReminder
   messageType.value = 'info'
 
   const startTime = Date.now()
@@ -204,7 +208,7 @@ async function createReminder() {
       await new Promise(resolve => setTimeout(resolve, 2000 - operationTime))
     }
 
-    message.value = 'Reminder created successfully!'
+    message.value = t.value.reminderSuccess
     messageType.value = 'success'
   } catch (error) {
     // For errors, also ensure minimum 2 second delay
@@ -213,7 +217,7 @@ async function createReminder() {
       await new Promise(resolve => setTimeout(resolve, 2000 - operationTime))
     }
 
-    message.value = 'Error creating reminder'
+    message.value = t.value.reminderError
     messageType.value = 'error'
     console.error('Error:', error)
   } finally {
@@ -232,7 +236,12 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 
 <template>
   <div class="app">
-    <h1>Calendar Reminder App</h1>
+    <LanguageSwitcher 
+      :currentLanguage="currentLanguage"
+      :onLanguageChange="setLanguage"
+    />
+    
+    <h1>{{ t.appTitle }}</h1>
     
     <StatusMessage 
       :message="message"

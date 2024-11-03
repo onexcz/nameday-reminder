@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { Notification } from '../types/types'
+import { useTranslations } from '../composables/useTranslations'
+
+const { t } = useTranslations()
 
 const props = defineProps<{
   notifications: Notification[]
@@ -48,7 +51,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
 
 <template>
   <div class="notification-settings">
-    <h3>Notification Settings</h3>
+    <h3>{{ t.notificationSettings }}</h3>
     
     <div class="notifications-list">
       <div 
@@ -64,7 +67,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
             @change="updateNotification(notification.id, notification.daysBefore, notification.time)"
             class="days-input"
           />
-          <span>days before at</span>
+          <span>{{ t.daysBefore }}</span>
           <input 
             type="time" 
             v-model="notification.time"
@@ -89,7 +92,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
       @click="addNotification"
       class="new-notification-button"
     >
-      Add New Notification
+      {{ t.addNotification }}
     </button>
   </div>
 </template>

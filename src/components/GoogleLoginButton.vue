@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useTranslations } from '../composables/useTranslations'
+
+const { t } = useTranslations()
+
 defineProps<{
   onLogin: () => void
 }>()
@@ -6,7 +10,7 @@ defineProps<{
 
 <template>
   <button @click="onLogin" class="login-button">
-    Login with Google
+    {{ t.login }}
   </button>
 </template>
 

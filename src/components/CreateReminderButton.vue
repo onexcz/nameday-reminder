@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useTranslations } from '../composables/useTranslations'
+
+const { t } = useTranslations()
+
 defineProps<{
   disabled: boolean
   isCreating: boolean
@@ -12,7 +16,7 @@ defineProps<{
     :disabled="disabled || isCreating"
     class="create-button"
   >
-    <span v-if="!isCreating">Create Reminder</span>
+    <span v-if="!isCreating">{{ t.createReminder }}</span>
     <div v-else class="spinner"></div>
   </button>
 </template>
