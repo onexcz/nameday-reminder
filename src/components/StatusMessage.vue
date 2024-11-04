@@ -14,6 +14,7 @@ defineProps<{
 <style scoped>
 .message {
   margin-top: 20px;
+  margin-bottom: 10px;
   padding: 10px;
   border-radius: 4px;
 }

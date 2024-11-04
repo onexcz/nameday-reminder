@@ -1,6 +1,6 @@
 export const translations = {
   cs: {
-    appTitle: 'Kalendář svátků',
+    appTitle: 'Nezapomeň na svátky!',
     login: 'Přihlásit se pomocí Google',
     searchPlaceholder: 'Zadejte nebo vyberte jméno...',
     notificationSettings: 'Nastavení upozornění',
@@ -16,7 +16,11 @@ export const translations = {
     loadingError: 'Chyba při načítání dat',
     language: 'Jazyk',
     createdEventsTitle: 'Vytvořená připomenutí',
-    loadingEvents: 'Načítám existující připomenutí...'
+    loadingEvents: 'Načítám existující připomenutí...',
+    infoTitle: 'Vytvářejte připomenutí svátků snadno a rychle',
+    infoStep1: 'Přihlaste se pomocí Google účtu',
+    infoStep2: 'Vyberte jméno ze seznamu',
+    infoStep3: 'Klikněte na tlačítko pro vytvoření připomenutí a hotovo! Událost bude vytvořena s každoročním opakováním a dvěma upozorněními.'
   },
   en: {
     appTitle: 'Name Day Calendar',
@@ -35,7 +39,11 @@ export const translations = {
     loadingError: 'Error loading data',
     language: 'Language',
     createdEventsTitle: 'Created Reminders',
-    loadingEvents: 'Loading existing reminders...'
+    loadingEvents: 'Loading existing reminders...',
+    infoTitle: 'Create name day reminders quickly and easily',
+    infoStep1: 'Sign in with your Google account',
+    infoStep2: 'Select a name from the list',
+    infoStep3: 'Click the create button and you\'re done! The event will be created with yearly recurrence and two reminders.'
   }
 }
 
