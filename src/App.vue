@@ -307,7 +307,7 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
         :notifications="notifications"
         :onUpdate="handleNotificationsUpdate"
       />
-
+      
       <CreateReminderButton 
         :disabled="!selectedName"
         :isCreating="isCreating"

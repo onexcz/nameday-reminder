@@ -4,7 +4,7 @@ export const translations = {
     login: 'Přihlásit se pomocí Google',
     searchPlaceholder: 'Zadejte nebo vyberte jméno...',
     notificationSettings: 'Nastavení upozornění',
-    daysBefore: 'dní před v',
+    daysBefore: 'dní předem v',
     addNotification: 'Přidat upozornění',
     createReminder: 'Vytvořit připomenutí',
     creatingReminder: 'Vytvářím připomenutí...',
