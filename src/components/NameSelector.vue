@@ -35,6 +35,12 @@ function selectName(person: Person) {
   props.onSelect(person)
 }
 
+function clearInput() {
+  searchInput.value = ''
+  props.onSelect({} as Person)
+  showDropdown.value = false
+}
+
 onMounted(() => {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
@@ -48,13 +54,23 @@ onMounted(() => {
 <template>
   <div class="name-selector">
     <div class="input-container">
-      <input 
-        v-model="searchInput"
-        :placeholder="t.searchPlaceholder"
-        class="name-input"
-        @input="handleInput"
-        @focus="showDropdown = true"
-      />
+      <div class="input-wrapper">
+        <input 
+          v-model="searchInput"
+          :placeholder="t.searchPlaceholder"
+          class="name-input"
+          @input="handleInput"
+          @focus="showDropdown = true"
+        />
+        <button 
+          v-if="searchInput"
+          @click="clearInput"
+          class="clear-button"
+          title="Clear"
+        >
+          ×
+        </button>
+      </div>
       <div 
         v-if="showDropdown && filteredNames.length > 0" 
         class="dropdown"
@@ -83,13 +99,40 @@ onMounted(() => {
   width: 100%;
 }
 
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .name-input {
   width: 100%;
   padding: 8px;
+  padding-right: 30px; /* Make room for the clear button */
   margin: 8px 0;
   border: 1px solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
+}
+
+.clear-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-button:hover {
+  color: #333;
 }
 
 .dropdown {
