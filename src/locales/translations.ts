@@ -14,7 +14,9 @@ export const translations = {
     loginSuccess: 'Úspěšně přihlášeno',
     waitForApi: 'Počkejte prosím na načtení Google API',
     loadingError: 'Chyba při načítání dat',
-    language: 'Jazyk'
+    language: 'Jazyk',
+    createdEventsTitle: 'Vytvořená připomenutí',
+    loadingEvents: 'Načítám existující připomenutí...'
   },
   en: {
     appTitle: 'Name Day Calendar',
@@ -31,7 +33,9 @@ export const translations = {
     loginSuccess: 'Successfully logged in',
     waitForApi: 'Please wait for Google API to load',
     loadingError: 'Error loading data',
-    language: 'Language'
+    language: 'Language',
+    createdEventsTitle: 'Created Reminders',
+    loadingEvents: 'Loading existing reminders...'
   }
 }
 

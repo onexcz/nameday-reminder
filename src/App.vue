@@ -10,6 +10,7 @@ import NotificationSettings from './components/NotificationSettings.vue'
 import type { Person, Notification } from './types/types'
 import { useTranslations } from './composables/useTranslations'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import CreatedEventsList from './components/CreatedEventsList.vue'
 
 const isAuthenticated = ref(false)
 const selectedName = ref<Person | null>(null)
@@ -37,6 +38,9 @@ const notifications = ref<Notification[]>([
 ])
 
 const { t, currentLanguage, setLanguage } = useTranslations()
+
+// Add new ref for created events
+const createdEvents = ref<string[]>([])
 
 onMounted(async () => {
   await loadGoogleAPI()
@@ -118,19 +122,53 @@ async function handleLogin() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CONFIG.CLIENT_ID,
     scope: GOOGLE_CONFIG.SCOPES,
-    callback: (response) => {
+    callback: async (response) => {
       if (response.error) {
         message.value = t.value.loginError
         messageType.value = 'error'
         return
       }
       isAuthenticated.value = true
-      message.value = t.value.loginSuccess
-      messageType.value = 'success'
+      await loadExistingEvents() // Load events after successful login
     }
   })
   
   tokenClient.requestAccessToken()
+}
+
+async function loadExistingEvents() {
+  try {
+    // Find Svátky calendar
+    const calendarList = await gapi.client.request({
+      path: 'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+    })
+    const svatkyCalendar = calendarList.result.items?.find(
+      cal => cal.summary === 'Svátky'
+    )
+
+    if (svatkyCalendar) {
+      // Load events from the calendar
+      const events = await gapi.client.request({
+        path: 'https://www.googleapis.com/calendar/v3/calendars/' + svatkyCalendar.id + '/events',
+        params: {
+          timeMin: new Date(new Date().getFullYear(), 0, 1).toISOString(),
+          timeMax: new Date(new Date().getFullYear(), 11, 31).toISOString(),
+          singleEvents: false,
+          showDeleted: false
+        }
+      })
+
+      // Extract names from event summaries
+      const names = events.result.items
+        ?.map(event => event.summary?.split(':')[0]?.trim())
+        .filter((name): name is string => !!name)
+        .sort((a, b) => a.localeCompare(b, 'cs'))
+
+      createdEvents.value = Array.from(new Set(names)) // Remove duplicates
+    }
+  } catch (error) {
+    console.error('Error loading existing events:', error)
+  }
 }
 
 async function createReminder() {
@@ -200,6 +238,13 @@ async function createReminder() {
       resource: event,
     })
 
+    // Add the new name to the list
+    if (!createdEvents.value.includes(person.name)) {
+      createdEvents.value = [...createdEvents.value, person.name].sort((a, b) => 
+        a.localeCompare(b, 'cs')
+      )
+    }
+
     // Calculate how long the operation took
     const operationTime = Date.now() - startTime
     
@@ -267,6 +312,10 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
         :disabled="!selectedName"
         :isCreating="isCreating"
         :onCreate="createReminder"
+      />
+
+      <CreatedEventsList 
+        :createdEvents="createdEvents"
       />
     </div>
   </div>
