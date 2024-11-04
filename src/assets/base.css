@@ -24,7 +24,13 @@ body {
 
 .app-container {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 0;
+}
+
+@media (min-width: 400px) {
+  .app-container {
+    padding: 2rem;
+  }
 }
 
 .card {

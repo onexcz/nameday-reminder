@@ -351,6 +351,18 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
   padding: 2rem;
 }
 
+@media (max-width: 399px) {
+  .content-card-authenticated {
+    background: transparent;
+    box-shadow: none;
+    padding: 1rem;
+  }
+
+  .content-card {
+    padding: 0;
+  }
+}
+
 .authenticated-content {
   display: flex;
   flex-direction: column;

@@ -104,6 +104,12 @@ function updateNotification(id: string, daysBefore: number, time: string) {
   padding: 1.5rem;
 }
 
+@media (max-width: 399px) {
+  .notification-settings {
+    padding: 0;
+  }
+}
+
 .notification-settings h3 {
   margin: 0 0 1rem 0;
   color: var(--text-primary);
