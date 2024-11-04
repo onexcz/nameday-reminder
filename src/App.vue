@@ -282,10 +282,10 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 <template>
   <div class="app-container">
     <div class="app">
-      <LanguageSwitcher 
+      <!-- <LanguageSwitcher 
         :currentLanguage="currentLanguage"
         :onLanguageChange="setLanguage"
-      />
+      /> -->
       
       <h1 class="app-title">{{ t.appTitle }}</h1>
       
