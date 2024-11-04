@@ -161,7 +161,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
 .new-notification-button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  background-color: var(--success-color);
+  background-color: #a3aaa8;
   color: white;
   border: none;
   border-radius: var(--radius);
