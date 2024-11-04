@@ -11,6 +11,7 @@ import type { Person, Notification } from './types/types'
 import { useTranslations } from './composables/useTranslations'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
 import CreatedEventsList from './components/CreatedEventsList.vue'
+import InfoPanel from './components/InfoPanel.vue'
 
 const isAuthenticated = ref(false)
 const selectedName = ref<Person | null>(null)
@@ -282,11 +283,6 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 <template>
   <div class="app-container">
     <div class="app">
-      <!-- <LanguageSwitcher 
-        :currentLanguage="currentLanguage"
-        :onLanguageChange="setLanguage"
-      /> -->
-      
       <h1 class="app-title">{{ t.appTitle }}</h1>
       
       <StatusMessage 
@@ -296,7 +292,10 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
       
       <div class="content-card">
         <div v-if="!isAuthenticated">
-          <GoogleLoginButton :onLogin="handleLogin" />
+          <InfoPanel />
+          <div class="login-container">
+            <GoogleLoginButton :onLogin="handleLogin" />
+          </div>
         </div>
         
         <div v-else class="authenticated-content">
@@ -351,5 +350,11 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
 }
 </style>
