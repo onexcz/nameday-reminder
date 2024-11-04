@@ -99,66 +99,71 @@ function updateNotification(id: string, daysBefore: number, time: string) {
 
 <style scoped>
 .notification-settings {
-  margin: 20px 0;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.notification-settings h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
 }
 
 .notifications-list {
-  margin: 10px 0;
-}
-
-.notification-item {
-  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .notification-inputs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .days-input {
-  width: 60px;
-  padding: 4px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: 70px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
 }
 
 .time-input {
-  padding: 4px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
 }
 
 .delete-button {
-  padding: 4px 8px;
-  background-color: transparent;
-  color: #dc3545;
+  padding: 0.5rem;
+  color: var(--error-color);
+  background: transparent;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: color 0.2s;
 }
 
 .delete-button:hover {
-  color: #bd2130;
+  color: var(--error-hover);
 }
 
 .new-notification-button {
-  background-color: #4CAF50;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--success-color);
   color: white;
-  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius);
   cursor: pointer;
-  margin-top: 10px;
+  transition: background-color 0.2s;
 }
 
 .new-notification-button:hover {
-  background-color: #45a049;
+  background-color: var(--success-hover);
 }
 </style> 

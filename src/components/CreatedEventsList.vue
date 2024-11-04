@@ -25,26 +25,39 @@ defineProps<{
 
 <style scoped>
 .created-events {
-  margin-top: 30px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.created-events h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
 }
 
 .events-list {
   list-style: none;
   padding: 0;
-  margin: 10px 0;
+  margin: 0;
   max-height: 200px;
   overflow-y: auto;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .event-item {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .event-item:last-child {
   border-bottom: none;
+}
+
+.event-item:hover {
+  background-color: var(--background-light);
 }
 </style> 

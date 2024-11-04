@@ -280,43 +280,47 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 </script>
 
 <template>
-  <div class="app">
-    <LanguageSwitcher 
-      :currentLanguage="currentLanguage"
-      :onLanguageChange="setLanguage"
-    />
-    
-    <h1>{{ t.appTitle }}</h1>
-    
-    <StatusMessage 
-      :message="message"
-      :type="messageType"
-    />
-    
-    <div v-if="!isAuthenticated">
-      <GoogleLoginButton :onLogin="handleLogin" />
-    </div>
-    
-    <div v-else>
-      <NameSelector 
-        :names="names"
-        :onSelect="handleNameSelect"
-      />
-
-      <NotificationSettings
-        :notifications="notifications"
-        :onUpdate="handleNotificationsUpdate"
+  <div class="app-container">
+    <div class="app">
+      <LanguageSwitcher 
+        :currentLanguage="currentLanguage"
+        :onLanguageChange="setLanguage"
       />
       
-      <CreateReminderButton 
-        :disabled="!selectedName"
-        :isCreating="isCreating"
-        :onCreate="createReminder"
+      <h1 class="app-title">{{ t.appTitle }}</h1>
+      
+      <StatusMessage 
+        :message="message"
+        :type="messageType"
       />
+      
+      <div class="content-card">
+        <div v-if="!isAuthenticated">
+          <GoogleLoginButton :onLogin="handleLogin" />
+        </div>
+        
+        <div v-else class="authenticated-content">
+          <NameSelector 
+            :names="names"
+            :onSelect="handleNameSelect"
+          />
 
-      <CreatedEventsList 
-        :createdEvents="createdEvents"
-      />
+          <NotificationSettings
+            :notifications="notifications"
+            :onUpdate="handleNotificationsUpdate"
+          />
+          
+          <CreateReminderButton 
+            :disabled="!selectedName"
+            :isCreating="isCreating"
+            :onCreate="createReminder"
+          />
+
+          <CreatedEventsList 
+            :createdEvents="createdEvents"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -325,6 +329,27 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 .app {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  position: relative;
+}
+
+.app-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.content-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+.authenticated-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 </style>
