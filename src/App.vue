@@ -290,7 +290,7 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
         :type="messageType"
       />
       
-      <div class="content-card">
+      <div :class="isAuthenticated ? 'content-card-authenticated' : 'content-card'">
         <div v-if="!isAuthenticated">
           <InfoPanel />
           <div class="login-container">
@@ -340,6 +340,11 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
 }
 
 .content-card {
+  border-radius: var(--radius);
+  padding: 2rem;
+}
+
+.content-card-authenticated {
   background: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
