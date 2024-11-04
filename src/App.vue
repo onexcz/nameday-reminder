@@ -351,7 +351,7 @@ function handleNotificationsUpdate(newNotifications: Notification[]) {
   padding: 2rem;
 }
 
-@media (max-width: 399px) {
+@media (max-width: 426px) {
   .content-card-authenticated {
     background: transparent;
     box-shadow: none;

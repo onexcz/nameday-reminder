@@ -104,7 +104,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
   padding: 1.5rem;
 }
 
-@media (max-width: 399px) {
+@media (max-width: 426px) {
   .notification-settings {
     padding: 0;
   }
