@@ -91,7 +91,7 @@ async function loadGoogleAPI() {
 }
 
 function loadCSVData() {
-  fetch('/src/data/name_days.csv')
+  fetch('https://namedayremindersa.blob.core.windows.net/data/name_days.csv')
     .then(response => response.text())
     .then(csvString => {
       const results = Papa.parse<string[]>(csvString, {
