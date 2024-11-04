@@ -90,7 +90,6 @@ onMounted(() => {
 
 <style scoped>
 .name-selector {
-  margin: 20px 0;
   width: 100%;
 }
 
