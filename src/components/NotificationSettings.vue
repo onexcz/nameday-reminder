@@ -133,7 +133,7 @@ function updateNotification(id: string, daysBefore: number, time: string) {
 }
 
 .days-input {
-  width: 70px;
+  width: 20px;
   padding: 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
